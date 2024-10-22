@@ -1,6 +1,12 @@
 ---
+theme: dashboard
 toc: false
+style: style.css
 ---
+
+```js
+import {dropdownInput} from "./components/dropdown.js";
+```
 
 # tramlaW Scorecard
 
