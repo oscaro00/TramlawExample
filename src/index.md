@@ -13,6 +13,9 @@ import {dropdownInput} from "./components/dropdown.js";
 ---
 
 ```js
+// look into this for the preset bookmarks
+// https://github.com/observablehq/framework/discussions/883
+
 const db = await DuckDBClient.of({ 
   fact_pos: FileAttachment('./data/fact_pos.parquet').parquet(),
   fact_inv: FileAttachment('./data/fact_inventory.parquet').parquet(),
@@ -36,6 +39,8 @@ const selectTimeFrame = dropdownInput({
   selected: ["1,13"],
   is_multi: false
 });
+// Need the generator to access the dropdown value
+const timeFrame = Generators.input(selectTimeFrame);
 
 const selectCategory = dropdownInput({
   inputLabel: "Category",
@@ -50,7 +55,23 @@ const selectCategory = dropdownInput({
   selected: ['Category1', 'Category2', 'Category3', 'Category4', 'Category5', 'Category6'],
   is_multi: true
 });
+// Need the generator to access the dropdown value
+const category = Generators.input(selectCategory);
+
+// function display_dropdowns(dropdown1, dropdown2) {
+//   return html`
+//   <div class="grid grid-cols-2">
+//     <div>${display(dropdown1)}</div>
+//     <div>${display(dropdown2)}</div>
+//   </div>
+//   `;
+// }
 ```
+
+```js
+// display_dropdowns(selectTimeFrame, selectCategory)
+```
+
 
 <div class="grid grid-cols-2">
   <div>
@@ -61,6 +82,10 @@ const selectCategory = dropdownInput({
   </div>
 </div>
 
+```js
+display(timeFrame)
+display(category)
+```
 
 ```js
 Inputs.table(pos)
@@ -72,4 +97,12 @@ Inputs.table(inv)
 
 ```js
 Inputs.table(frac)
+```
+
+```js
+// see ________ for reading the session storage object
+const filter_parameters_object = {time: timeFrame, catg: category};
+display(filter_parameters_object)
+const filter_string = JSON.stringify(filter_parameters_object)
+sessionStorage.setItem("filter parameter context", filter_string);
 ```

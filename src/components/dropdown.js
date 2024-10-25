@@ -21,10 +21,10 @@ export function dropdownInput(config = {}) {
   const dropdownButton = Inputs.button(html`<div class='button-inner' style='display:flex;justify-content:space-between;height:100%;' id='dropdown-${inputId}'><div class='filter-selected' style='text-align:left;'>${placeholderText}</div><span style='font-size:10px;padding-left:5px;display:flex;align-items:center;'><i class="fas fa-chevron-down"></i></span></div>`);
   dropdownButton.classList.add("dropdown-button");
   
-  const  optionValues = options.map(option => option.value)
+  const optionValues = options.map(option => option.value)
   
   //selectInput
-  const selectInput = Inputs.select(optionValues, {multiple:is_multi, value:selected});
+  const selectInput = Inputs.select(optionValues, {multiple:true, value:selected});
   selectInput.classList.add("dropdown-select");
   selectInput.style.display="none";
   
