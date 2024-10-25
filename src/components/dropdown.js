@@ -47,18 +47,35 @@ export function dropdownInput(config = {}) {
       const clickedItemId = clickedListItem.id;
       const index = selectInputValue.indexOf(clickedItemId);
 
-      if (clickedListItem.classList.contains('selected')) {
-        clickedListItem.classList.remove('selected');
-        
-        if (index !== -1) {
-          selectInputValue.splice(index, 1);
+      if (is_multi) {
+        if (clickedListItem.classList.contains('selected')) {
+          clickedListItem.classList.remove('selected');
+          
+          if (index !== -1) {
+            selectInputValue.splice(index, 1);
+          }
+        } else {
+  
+          clickedListItem.classList.add('selected');
+          selectInputValue.push(option.value);
         }
       } else {
+        if (clickedListItem.classList.contains('selected')) {
+          // do nothing
+        } else {
+          selectInput.value = [];
+          selectInputValue = [];
+          form.value = [];
 
-        clickedListItem.classList.add('selected');
-        selectInputValue.push(option.value);
+          optionListItems.forEach(t => {
+            t.classList.remove('selected');
+          });
+
+          clickedListItem.classList.add('selected');
+          selectInputValue.push(option.value);
+        }
       }
-
+      
       // Update selectInput value
       selectInput.value = selectInputValue;
       
