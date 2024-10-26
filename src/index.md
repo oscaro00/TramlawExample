@@ -6,6 +6,7 @@ style: style.css
 
 ```js
 import {dropdownInput} from "./components/dropdown.js";
+import {format_dropdown_inputs, zip_dropdown_inputs} from "./components/dropdown_inputs.js";
 ```
 
 # tramlaW Scorecard
@@ -27,6 +28,17 @@ const frac = await db.sql`select * from fact_frac`;
 ```
 
 ```js
+const distinct_catg = await db.sql([`
+  select distinct category from fact_pos order by category asc
+`]);
+const arr_distinct_catg = distinct_catg.toArray();
+const catg_values = format_dropdown_inputs(arr_distinct_catg, 'category', true);
+const catg_labels = format_dropdown_inputs(arr_distinct_catg, 'category', false);
+const catg_values_labels = zip_dropdown_inputs(catg_values, catg_labels);
+```
+
+
+```js
 const selectTimeFrame = dropdownInput({
   inputLabel: "Timeframe",
   inputId: "timeframe",
@@ -39,23 +51,18 @@ const selectTimeFrame = dropdownInput({
   selected: ["1,13"],
   is_multi: false
 });
-// Need the generator to access the dropdown value
+// Need the generator to access the dropdown value without placing the dropdown dom element
 const timeFrame = Generators.input(selectTimeFrame);
 
 const selectCategory = dropdownInput({
   inputLabel: "Category",
   inputId: "category",
   placeholderText: 'Select category...',
-  options: [{value:"Category1", label:'Category 1'},
-            {value:"Category2", label: 'Category 2'},
-            {value:"Category3", label: 'Category 3'},
-            {value:"Category4", label: 'Category 4'},
-            {value:"Category5", label: 'Category 5'},
-            {value:"Category6", label: 'Category 6'}],
-  selected: ['Category1', 'Category2', 'Category3', 'Category4', 'Category5', 'Category6'],
+  options: catg_values_labels,
+  selected: catg_values,
   is_multi: true
 });
-// Need the generator to access the dropdown value
+// Need the generator to access the dropdown value without placing the dropdown dom element
 const category = Generators.input(selectCategory);
 
 // function display_dropdowns(dropdown1, dropdown2) {
