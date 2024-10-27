@@ -95,6 +95,65 @@ display(category)
 ```
 
 ```js
+const ty_dollars = await db.sql([`
+  with selected_weeks as (
+    select distinct
+      week
+    from
+      fact_pos
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+  )
+  select
+    sum(dollars) as ty_dollars
+  from
+    fact_pos
+    inner join selected_weeks on selected_weeks.week = fact_pos.week
+  where
+    category in (${category.length == 0 ? "'placeholder'" : category})
+`]);
+```
+
+```js
+const ly_dollars = await db.sql([`
+  with selected_weeks as (
+    select distinct
+      week
+    from
+      fact_pos
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+    offset
+      52
+  )
+  select
+    sum(dollars) as ly_dollars
+  from
+    fact_pos
+    inner join selected_weeks on selected_weeks.week = fact_pos.week
+  where
+    category in (${category.length == 0 ? "'placeholder'" : category})
+`]);
+```
+
+```js
+Inputs.table(ty_dollars)
+```
+
+```js
+Inputs.table(ly_dollars)
+```
+
+```js
+display(ty_dollars.toArray())
+```
+
+
+```js
 Inputs.table(pos)
 ```
 
