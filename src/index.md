@@ -7,6 +7,7 @@ style: style.css
 ```js
 import {dropdownInput} from "./components/dropdown.js";
 import {format_dropdown_inputs, zip_dropdown_inputs} from "./components/dropdown_inputs.js";
+import {big_value_card} from "./components/big_value_card.js";
 ```
 
 # tramlaW Scorecard
@@ -149,7 +150,7 @@ Inputs.table(ly_dollars)
 ```
 
 ```js
-display(ty_dollars.toArray())
+display(big_value_card(ty_dollars.toArray()[0]["ty_dollars"], "dollars", ly_dollars.toArray()[0]["ly_dollars"], "percentage", "TY Dollars", "vs LY"))
 ```
 
 
@@ -169,6 +170,6 @@ Inputs.table(frac)
 // see ________ for reading the session storage object
 const filter_parameters_object = {time: timeFrame, catg: category};
 display(filter_parameters_object)
-const filter_string = JSON.stringify(filter_parameters_object)
+const filter_string = JSON.stringify(filter_parameters_object);
 sessionStorage.setItem("filter parameter context", filter_string);
 ```
