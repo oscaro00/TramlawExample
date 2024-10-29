@@ -16,6 +16,10 @@ export function big_value_card(big_value, big_format, comparison_value, comparis
     
     let formatted_big_value = format_order(big_value, 2);
     let formatted_comparison_value = format_order(((big_value - comparison_value) / comparison_value), 1);
+
+    let arrow_shape = (((big_value - comparison_value) / comparison_value) >= 0) ? "&#x25B2;" : "&#x25BC;";
+    let arrow_color = (((big_value - comparison_value) / comparison_value) >= 0) ? "green" : "red";
+    let arrow = html`<p style=${{color: arrow_color}}>${arrow_shape}</p>`;
     
     return html`
         <h2>${title}</h2>

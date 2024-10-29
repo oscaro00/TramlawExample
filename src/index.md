@@ -148,11 +148,74 @@ const dollars_card = big_value_card(ty_metrics.toArray()[0]["ty_dollars"], "doll
 const units_card = big_value_card(ty_metrics.toArray()[0]["ty_units"], "units", ly_metrics.toArray()[0]["ly_units"], "percentage", "TY Units", "vs LY");
 ```
 
+```js
+const pos_table = await db.sql([`
+  with ty_selected_weeks as (
+    select distinct
+      week
+    from
+      fact_pos
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+    offset
+      52
+  ),
+  ly_selected_weeks as (
+    select distinct
+      week
+    from
+      fact_pos
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+    offset
+      52
+  ),
+  ty_metrics as (
+    select
+      category,
+      sum(dollars) as ty_dollars
+    from
+      fact_pos
+      inner join ty_selected_weeks on ty_selected_weeks.week = fact_pos.week
+    where
+      category in (${category.length == 0 ? "'placeholder'" : category})
+    group by
+      category
+  ),
+  ly_metrics as (
+    select
+      category,
+      sum(dollars) as ly_dollars
+    from
+      fact_pos
+      inner join ly_selected_weeks on ly_selected_weeks.week = fact_pos.week
+    where
+      category in (${category.length == 0 ? "'placeholder'" : category})
+    group by
+      category
+  )
+  select
+    ty_metrics.category as Category,
+    round(ty_metrics.ty_dollars) as Dollars,
+    round((ty_dollars - ly_dollars) / ly_dollars * 100, 1) as Chg
+  from
+    ty_metrics
+    inner join ly_metrics on ly_metrics.category = ty_metrics.category
+  order by
+    ty_metrics.category asc
+`]);
+```
+
+
 <div class="grid grid-cols-4">
   <div class="card">${dollars_card}</div>
   <div class="card">${units_card}</div>
   <div class="card grid-colspan-2"><h1>C</h1>1 × 1</div>
-  <div class="card grid-colspan-2"><h1>D</h1>2 × 1</div>
+  <div class="card grid-colspan-2"><h1>${Inputs.table(pos_table)}</h1>2 × 1</div>
   <div class="card grid-colspan-2"><h1>E</h1>2 × 1</div>
 </div>
 
