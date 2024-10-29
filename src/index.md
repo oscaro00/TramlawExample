@@ -96,7 +96,7 @@ display(category)
 ```
 
 ```js
-const ty_dollars = await db.sql([`
+const ty_metrics = await db.sql([`
   with selected_weeks as (
     select distinct
       week
@@ -108,7 +108,8 @@ const ty_dollars = await db.sql([`
       ${Number(timeFrame[0].split(",")[1])}
   )
   select
-    sum(dollars) as ty_dollars
+    sum(dollars) as ty_dollars,
+    sum(units) as ty_units
   from
     fact_pos
     inner join selected_weeks on selected_weeks.week = fact_pos.week
@@ -118,7 +119,7 @@ const ty_dollars = await db.sql([`
 ```
 
 ```js
-const ly_dollars = await db.sql([`
+const ly_metrics = await db.sql([`
   with selected_weeks as (
     select distinct
       week
@@ -132,7 +133,8 @@ const ly_dollars = await db.sql([`
       52
   )
   select
-    sum(dollars) as ly_dollars
+    sum(dollars) as ly_dollars,
+    sum(units) as ly_units
   from
     fact_pos
     inner join selected_weeks on selected_weeks.week = fact_pos.week
@@ -142,16 +144,18 @@ const ly_dollars = await db.sql([`
 ```
 
 ```js
-Inputs.table(ty_dollars)
+const dollars_card = big_value_card(ty_metrics.toArray()[0]["ty_dollars"], "dollars", ly_metrics.toArray()[0]["ly_dollars"], "percentage", "TY Dollars", "vs LY");
+const units_card = big_value_card(ty_metrics.toArray()[0]["ty_units"], "units", ly_metrics.toArray()[0]["ly_units"], "percentage", "TY Units", "vs LY");
 ```
 
-```js
-Inputs.table(ly_dollars)
-```
+<div class="grid grid-cols-4">
+  <div class="card">${dollars_card}</div>
+  <div class="card">${units_card}</div>
+  <div class="card grid-colspan-2"><h1>C</h1>1 × 1</div>
+  <div class="card grid-colspan-2"><h1>D</h1>2 × 1</div>
+  <div class="card grid-colspan-2"><h1>E</h1>2 × 1</div>
+</div>
 
-```js
-display(big_value_card(ty_dollars.toArray()[0]["ty_dollars"], "dollars", ly_dollars.toArray()[0]["ly_dollars"], "percentage", "TY Dollars", "vs LY"))
-```
 
 
 ```js
