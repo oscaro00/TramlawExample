@@ -37,6 +37,14 @@ const arr_distinct_catg = distinct_catg.toArray();
 const catg_values = format_dropdown_inputs(arr_distinct_catg, 'category', true);
 const catg_labels = format_dropdown_inputs(arr_distinct_catg, 'category', false);
 const catg_values_labels = zip_dropdown_inputs(catg_values, catg_labels);
+
+const distinct_timeframe = await db.sql([`
+  select distinct timeframe from fact_frac order by timeframe asc
+`]);
+const arr_distinct_timeframe = distinct_timeframe.toArray();
+const timeframe_values = format_dropdown_inputs(arr_distinct_timeframe, 'timeframe', true);
+const timeframe_labels = format_dropdown_inputs(arr_distinct_timeframe, 'timeframe', false);
+const timeframe_values_labels = zip_dropdown_inputs(timeframe_values, timeframe_labels); 
 ```
 
 
@@ -66,6 +74,17 @@ const selectCategory = dropdownInput({
 });
 // Need the generator to access the dropdown value without placing the dropdown dom element
 const category = Generators.input(selectCategory);
+
+const selectFracTimeframe = dropdownInput({
+  inputLabel: "Timeframe",
+  inputId: "timeframe",
+  placeholderText: 'Select timeframe...',
+  options: timeframe_values_labels,
+  selected: ["'Last 12 months'"],
+  is_multi: false
+});
+// Need the generator to access the dropdown value without placing the dropdown dom element
+const fracTimeframe = Generators.input(selectFracTimeframe);
 ```
 
 <div class="filters">
@@ -320,6 +339,25 @@ const inv_table = await db.sql([`
 `]);
 ```
 
+```js
+const frac_metrics = await db.sql([`
+  select
+    household_penetration,
+    buy_rate
+  from
+    fact_frac
+  where
+    category in (${category.length == 0 ? "'placeholder'" : category})
+    and timeframe = ${fracTimeframe}
+`]);
+```
+
+```js
+const household_penetration = frac_metrics.toArray()[0]["household_penetration"].toLocaleString("en-US", {style: "percent", minimumFractionDigits: 1});
+
+const buy_rate = frac_metrics.toArray()[0]["buy_rate"].toLocaleString("en-US", {minimumFractionDigits: 1});
+```
+
 
 ```js
 // see this link for formatting and a good card example
@@ -371,18 +409,21 @@ const inv_table = await db.sql([`
 
 # Denominator
 
+<div class="filters">
+  <div class="fracTimeframe" style="display: inline-block;">${view(selectFracTimeframe)}</div>
+</div>
 
-```js
-Inputs.table(pos)
-```
+<div class="grid grid-cols-4">
+  <a class="card" style="color: inherit;">
+    <h2>Household Penetration</h2>
+    <span class="big">${household_penetration}</span>
+  </a>
+  <a class="card" style="color: inherit;">
+    <h2>Buy Rate</h2>
+    <span class="big">${buy_rate}</span>
+  </a>
+</div>
 
-```js
-Inputs.table(inv)
-```
-
-```js
-Inputs.table(frac)
-```
 
 ```js
 // see ________ for reading the session storage object
