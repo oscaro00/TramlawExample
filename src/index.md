@@ -7,7 +7,8 @@ style: style.css
 ```js
 import {dropdownInput} from "./components/dropdown.js";
 import {format_dropdown_inputs, zip_dropdown_inputs} from "./components/dropdown_inputs.js";
-import {big_value_card} from "./components/big_value_card.js";
+// import {big_value_card} from "./components/big_value_card.js"; // replaced by trend.js
+import {Trend} from "./components/trend.js";
 ```
 
 # tramlaW Scorecard
@@ -65,21 +66,7 @@ const selectCategory = dropdownInput({
 });
 // Need the generator to access the dropdown value without placing the dropdown dom element
 const category = Generators.input(selectCategory);
-
-// function display_dropdowns(dropdown1, dropdown2) {
-//   return html`
-//   <div class="grid grid-cols-2">
-//     <div>${display(dropdown1)}</div>
-//     <div>${display(dropdown2)}</div>
-//   </div>
-//   `;
-// }
 ```
-
-```js
-// display_dropdowns(selectTimeFrame, selectCategory)
-```
-
 
 <div class="grid grid-cols-2">
   <div>
@@ -144,8 +131,13 @@ const ly_metrics = await db.sql([`
 ```
 
 ```js
-const dollars_card = big_value_card(ty_metrics.toArray()[0]["ty_dollars"], "dollars", ly_metrics.toArray()[0]["ly_dollars"], "percentage", "TY Dollars", "vs LY");
-const units_card = big_value_card(ty_metrics.toArray()[0]["ty_units"], "units", ly_metrics.toArray()[0]["ly_units"], "percentage", "TY Units", "vs LY");
+const ty_dollars = ty_metrics.toArray()[0]["ty_dollars"].toLocaleString("en-US", {currency: "USD", notation: "compact"});
+const dollars_comp = ly_metrics.toArray()[0]["ly_dollars"] ? 
+  ((ty_metrics.toArray()[0]["ty_dollars"] - ly_metrics.toArray()[0]["ly_dollars"]) / ly_metrics.toArray()[0]["ly_dollars"]) : undefined;
+
+const ty_units = ty_metrics.toArray()[0]["ty_units"].toLocaleString("en-US", {notation: "compact"});
+const units_comp = ly_metrics.toArray()[0]["ly_units"] ? 
+  ((ty_metrics.toArray()[0]["ty_units"] - ly_metrics.toArray()[0]["ly_units"]) / ly_metrics.toArray()[0]["ly_units"]) : undefined;
 ```
 
 ```js
@@ -209,13 +201,35 @@ const pos_table = await db.sql([`
     ty_metrics.category asc
 `]);
 ```
+```js
+// see this link for formatting and a good card example
+// https://observablehq.observablehq.cloud/framework-example-plot/
 
+// see for compact number formatting
+// https://stackoverflow.com/questions/9461621/format-a-number-as-2-5k-if-a-thousand-or-more-otherwise-900
+```
 
 <div class="grid grid-cols-4">
-  <div class="card">${dollars_card}</div>
-  <div class="card">${units_card}</div>
-  <div class="card grid-colspan-2"><h1>C</h1>1 × 1</div>
-  <div class="card grid-colspan-2"><h1>${Inputs.table(pos_table)}</h1>2 × 1</div>
+  <a class="card" style="color: inherit;">
+    <h2>Dollars</h2>
+    <span class="big">${ty_dollars}</span>
+    ${Trend(dollars_comp, {format: {style: "percent", minimumFractionDigits: 1}})}
+    <span class="muted">vs LY</span>
+  </a>
+  <a class="card" style="color: inherit;">
+    <h2>Units</h2>
+    <span class="big">${ty_units}</span>
+    ${Trend(units_comp, {format: {style: "percent", minimumFractionDigits: 1}})}
+    <span class="muted">vs LY</span>
+  </a>
+  <div class="card grid-colspan-2" style="color: inherit;">
+    <h2>GitHub stars</h2>
+    <span class="big">123M</span>
+    <span class="muted">over 7d</span></div>
+  <div class="card grid-colspan-2">
+    <h2>POS by Category</h2>
+    ${Inputs.table(pos_table)}
+  </div>
   <div class="card grid-colspan-2"><h1>E</h1>2 × 1</div>
 </div>
 
