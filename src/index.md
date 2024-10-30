@@ -68,13 +68,9 @@ const selectCategory = dropdownInput({
 const category = Generators.input(selectCategory);
 ```
 
-<div class="grid grid-cols-2">
-  <div>
-    ${view(selectTimeFrame)}
-  </div>
-  <div>
-    ${view(selectCategory)}
-  </div>
+<div class="filters">
+  <div class="timeFilter" style="display: inline-block;">${view(selectTimeFrame)}</div>
+  <div class="categoryFilter" style="display: inline-block;">${view(selectCategory)}</div>
 </div>
 
 ```js
@@ -201,13 +197,136 @@ const pos_table = await db.sql([`
     ty_metrics.category asc
 `]);
 ```
+
+```js
+const ty_inv_metrics = await db.sql([`
+  with selected_weeks as (
+    select distinct
+      week
+    from
+      fact_inv
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+  )
+  select
+    sum(instock_numerator) / sum(instock_denominator) as ty_instock,
+    sum(pods) as ty_pods
+  from
+    fact_inv
+    inner join selected_weeks on selected_weeks.week = fact_inv.week
+  where
+    category in (${category.length == 0 ? "'placeholder'" : category})
+`]);
+```
+
+```js
+const ly_inv_metrics = await db.sql([`
+  with selected_weeks as (
+    select distinct
+      week
+    from
+      fact_inv
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+    offset
+      52
+  )
+  select
+    sum(instock_numerator) / sum(instock_denominator) as ly_instock,
+    sum(pods) as ly_pods
+  from
+    fact_inv
+    inner join selected_weeks on selected_weeks.week = fact_inv.week
+  where
+    category in (${category.length == 0 ? "'placeholder'" : category})
+`]);
+```
+
+```js
+const ty_instock = ty_inv_metrics.toArray()[0]["ty_instock"].toLocaleString("en-US", {style: "percent", notation: "compact"});
+const instock_comp = ly_inv_metrics.toArray()[0]["ly_instock"] ? 
+  ((ty_inv_metrics.toArray()[0]["ty_instock"] - ly_inv_metrics.toArray()[0]["ly_instock"]) / ly_inv_metrics.toArray()[0]["ly_instock"]) : undefined;
+
+const ty_pods = ty_inv_metrics.toArray()[0]["ty_pods"].toLocaleString("en-US", {notation: "compact"});
+const pods_comp = ly_inv_metrics.toArray()[0]["ly_pods"] ? 
+  ((ty_inv_metrics.toArray()[0]["ty_pods"] - ly_inv_metrics.toArray()[0]["ly_pods"]) / ly_inv_metrics.toArray()[0]["ly_pods"]) : undefined;
+```
+
+```js
+const inv_table = await db.sql([`
+  with ty_selected_weeks as (
+    select distinct
+      week
+    from
+      fact_inv
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+    offset
+      52
+  ),
+  ly_selected_weeks as (
+    select distinct
+      week
+    from
+      fact_inv
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+    offset
+      52
+  ),
+  ty_metrics as (
+    select
+      category,
+      sum(instock_numerator) / sum(instock_denominator) as ty_instock,
+      sum(pods) as ty_pods
+    from
+      fact_inv
+      inner join ty_selected_weeks on ty_selected_weeks.week = fact_inv.week
+    where
+      category in (${category.length == 0 ? "'placeholder'" : category})
+    group by
+      category
+  ),
+  ly_metrics as (
+    select
+      category,
+      sum(instock_numerator) / sum(instock_denominator) as ly_instock,
+      sum(pods) as ly_pods
+    from
+      fact_inv
+      inner join ly_selected_weeks on ly_selected_weeks.week = fact_inv.week
+    where
+      category in (${category.length == 0 ? "'placeholder'" : category})
+    group by
+      category
+  )
+  select
+    ty_metrics.category as Category,
+    round(ty_metrics.ty_instock, 2) as Instock,
+    round(ty_metrics.ty_pods, 0) as PODs
+  from
+    ty_metrics
+    inner join ly_metrics on ly_metrics.category = ty_metrics.category
+  order by
+    ty_metrics.category asc
+`]);
+```
+
+
 ```js
 // see this link for formatting and a good card example
 // https://observablehq.observablehq.cloud/framework-example-plot/
-
-// see for compact number formatting
-// https://stackoverflow.com/questions/9461621/format-a-number-as-2-5k-if-a-thousand-or-more-otherwise-900
 ```
+
+# Light
 
 <div class="grid grid-cols-4">
   <a class="card" style="color: inherit;">
@@ -222,17 +341,35 @@ const pos_table = await db.sql([`
     ${Trend(units_comp, {format: {style: "percent", minimumFractionDigits: 1}})}
     <span class="muted">vs LY</span>
   </a>
-  <div class="card grid-colspan-2" style="color: inherit;">
-    <h2>GitHub stars</h2>
-    <span class="big">123M</span>
-    <span class="muted">over 7d</span></div>
-  <div class="card grid-colspan-2">
-    <h2>POS by Category</h2>
-    ${Inputs.table(pos_table)}
-  </div>
-  <div class="card grid-colspan-2"><h1>E</h1>2 × 1</div>
+  <a class="card" style="color: inherit;">
+    <h2>Instock</h2>
+    <span class="big">${ty_instock}</span>
+    ${Trend(instock_comp, {format: {style: "percent", minimumFractionDigits: 1}})}
+    <span class="muted">vs LY</span>
+  </a>
+  <a class="card" style="color: inherit;">
+    <h2>PODs</h2>
+    <span class="big">${ty_pods}</span>
+    ${Trend(pods_comp, {format: {style: "percent", minimumFractionDigits: 1}})}
+    <span class="muted">vs LY</span>
+  </a>
 </div>
 
+
+
+<div class="grid grid-cols-4">
+  <div class="card grid-colspan-2">
+      <h2>POS by Category</h2>
+    ${Inputs.table(pos_table)}
+  </div>
+  <div class="card grid-colspan-2">
+      <h2>Inventory by Category</h2>
+    ${Inputs.table(inv_table)}
+  </div>
+</div>
+
+
+# Denominator
 
 
 ```js
