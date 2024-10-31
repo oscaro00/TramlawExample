@@ -58,7 +58,7 @@ const selectTimeFrame = dropdownInput({
             {value:"1,13", label: 'Last 13 Weeks'},
             {value:"1,26", label: 'Last 26 Weeks'},
             {value:"1,52", label: 'Last 52 Weeks'}],
-  selected: ["1,13"],
+  selected: typeof filter_context["time"] !== undefined ? filter_context["time"] : ["1,13"],
   is_multi: false
 });
 // Need the generator to access the dropdown value without placing the dropdown dom element
@@ -426,9 +426,15 @@ const buy_rate = frac_metrics.toArray()[0]["buy_rate"].toLocaleString("en-US", {
 
 
 ```js
-// see ________ for reading the session storage object
+// see pos-summary.md for reading the session storage object
 const filter_parameters_object = {time: timeFrame, catg: category};
 display(filter_parameters_object)
 const filter_string = JSON.stringify(filter_parameters_object);
 sessionStorage.setItem("filter parameter context", filter_string);
+```
+
+```js
+const filter_string = sessionStorage.getItem("filter parameter context");
+const filter_context = JSON.parse(filter_string);
+// display(filter_context)
 ```
