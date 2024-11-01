@@ -106,6 +106,30 @@ export function dropdownInput(config = {}) {
   // Toggle the visibility of the select input on button click
   dropdownButton.onclick = (event) => {
     toggleDropdown();
+
+    selectInput.value = [];
+    selectInputValue = [];
+
+    optionListItems.forEach(t => {
+      t.classList.remove('selected');
+    });
+
+    optionListItems.forEach((t, index) => {
+      const option = options[index].value;
+
+      if (form.value.includes(option)) {
+        t.classList.add('selected');
+        selectInputValue.push(option);
+      }
+    });
+
+    // Update selectInput value
+    selectInput.value = selectInputValue;
+      
+    // Update form value with selectInputValue
+    form.value = selectInputValue;
+
+    form.dispatchEvent(new CustomEvent("input", { bubbles: true }));
   };
   
   optionListItems.forEach((t, index) => {

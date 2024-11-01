@@ -58,7 +58,7 @@ const selectTimeFrame = dropdownInput({
             {value:"1,13", label: 'Last 13 Weeks'},
             {value:"1,26", label: 'Last 26 Weeks'},
             {value:"1,52", label: 'Last 52 Weeks'}],
-  selected: typeof filter_context["time"] !== undefined ? filter_context["time"] : ["1,13"],
+  selected: ["1,13"], //(typeof filter_context["time"] === undefined | typeof filter_context["time"] === null) ? ["1,13"] : filter_context["time"],
   is_multi: false
 });
 // Need the generator to access the dropdown value without placing the dropdown dom element
@@ -87,9 +87,34 @@ const selectFracTimeframe = dropdownInput({
 const fracTimeframe = Generators.input(selectFracTimeframe);
 ```
 
+```js
+const evensButton = Inputs.button("Evens");
+const eButton = Generators.input(evensButton);
+const oddsButton = Inputs.button("Odds");
+const oButton = Generators.input(oddsButton);
+```
+
+```js
+if (eButton != 0) {
+  selectCategory.value = ["'Category2'", "'Category4'", "'Category6'"];
+  selectCategory.dispatchEvent(new Event("input", {bubbles: true}));
+  //selectCategory.dispatchEvent(new Event("click", {bubbles: true}));
+}
+```
+
+```js
+if (oButton != 0) {
+  selectCategory.value = ["'Category1'", "'Category3'", "'Category5'"];
+  selectCategory.dispatchEvent(new Event("input", {bubbles: true}));
+  //selectCategory.dispatchEvent(new Event("click", {bubbles: true}));
+}
+```
+
 <div class="filters">
   <div class="timeFilter" style="display: inline-block;">${view(selectTimeFrame)}</div>
   <div class="categoryFilter" style="display: inline-block;">${view(selectCategory)}</div>
+  <div class="evensButton" style="display: inline-block; max-width: 50px;">${view(evensButton)}</div>
+  <div class="oddsButton" style="display: inline-block; max-width: 50px;">${view(oddsButton)}</div>
 </div>
 
 ```js
