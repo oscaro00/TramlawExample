@@ -58,7 +58,7 @@ const selectTimeFrame = dropdownInput({
             {value:"1,13", label: 'Last 13 Weeks'},
             {value:"1,26", label: 'Last 26 Weeks'},
             {value:"1,52", label: 'Last 52 Weeks'}],
-  selected: ["1,13"], //(typeof filter_context["time"] === undefined | typeof filter_context["time"] === null) ? ["1,13"] : filter_context["time"],
+  selected: (typeof filter_context["time"] === undefined || typeof filter_context["time"] === null) ? ["1,13"] : filter_context["time"],
   is_multi: false
 });
 // Need the generator to access the dropdown value without placing the dropdown dom element
