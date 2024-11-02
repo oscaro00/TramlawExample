@@ -1,7 +1,7 @@
 ---
 theme: dashboard
 toc: false
-style: style.css
+style: custom-style.css
 ---
 
 ```js
