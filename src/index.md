@@ -58,7 +58,7 @@ const selectTimeFrame = dropdownInput({
             {value:"1,13", label: 'Last 13 Weeks'},
             {value:"1,26", label: 'Last 26 Weeks'},
             {value:"1,52", label: 'Last 52 Weeks'}],
-  selected: (typeof filter_context["time"] === undefined || typeof filter_context["time"] === null) ? ["1,13"] : filter_context["time"],
+  selected: filter_context["time"],
   is_multi: false
 });
 // Need the generator to access the dropdown value without placing the dropdown dom element
@@ -460,6 +460,13 @@ sessionStorage.setItem("filter parameter context", filter_string);
 
 ```js
 const filter_string = sessionStorage.getItem("filter parameter context");
-const filter_context = JSON.parse(filter_string);
+
+let filter_context = {};
+if (filter_string === null) {
+  filter_context["time"] = ["1,13"];
+} else {
+  filter_context = JSON.parse(filter_string);
+}
+// display(filter_string)
 // display(filter_context)
 ```
