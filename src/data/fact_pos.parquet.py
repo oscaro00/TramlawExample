@@ -1,6 +1,6 @@
 import polars as pl
-import pyarrow as pa
-import pyarrow.parquet as pq
+# import pyarrow as pa
+# import pyarrow.parquet as pq
 import sys
 
 df_pos = pl.scan_parquet('C:\\Users\\obrie\\Documents\\tramlaW Raw Data\\fact_pos.parquet')
