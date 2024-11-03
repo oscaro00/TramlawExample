@@ -191,8 +191,8 @@ const pos_table = await db.sql([`
       week desc
     limit
       ${Number(timeFrame[0].split(",")[1])}
-    offset
-      52
+    --offset
+      --52
   ),
   ly_selected_weeks as (
     select distinct
@@ -311,8 +311,8 @@ const inv_table = await db.sql([`
       week desc
     limit
       ${Number(timeFrame[0].split(",")[1])}
-    offset
-      52
+    --offset
+      --52
   ),
   ly_selected_weeks as (
     select distinct

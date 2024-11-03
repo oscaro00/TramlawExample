@@ -110,8 +110,8 @@ const pos_table = await db.sql([`
       week desc
     limit
       ${Number(timeFrame[0].split(",")[1])}
-    offset
-      52
+    --offset
+    --  52
   ),
   ly_selected_weeks as (
     select distinct
@@ -178,6 +178,62 @@ const pos_table = await db.sql([`
     ${Inputs.table(pos_table)}
   </div>
 </div>
+
+```js
+const pos_plot_data = await db.sql([`
+  with ty_selected_weeks as (
+    select distinct
+      week
+    from
+      fact_pos
+    order by
+      week desc
+    limit
+      ${Number(timeFrame[0].split(",")[1])}
+  )
+  select
+    fact_pos.week as Week,
+    channel as Channel,
+    sum(dollars) / 1000000 as Dollars
+  from
+    fact_pos
+    inner join ty_selected_weeks on ty_selected_weeks.week = fact_pos.week
+  group by
+    fact_pos.week,
+    channel
+  order by
+    fact_pos.week,
+    channel
+`]);
+```
+
+
+<!-- ```js
+const pos_plot = Plot.barY({
+  x : {interval : 1}
+  y : {grid : true},
+  marks : [
+    Plot.barY(pos_plot_data.toArray(), {x: "Week", y: "Dollars", fill: "Channel"}),
+    Plot.ruleY([0])
+  ]
+});
+``` -->
+
+<div class="card" style="display: flex; flex-direction: column; gap: 1rem;">
+  ${
+    resize((width) => Plot.plot({
+      width,
+      x : {type : "band"},
+      y : {grid : true, label : "Dollars (M)"},
+      color : {legend : true},
+      marks : [
+        Plot.barY(pos_plot_data.toArray(), {x: "Week", y: "Dollars", fill: "Channel", sort: {y: "-x"}}),
+        Plot.ruleY([0])
+      ]
+    }))
+  }
+</div>
+
 
 ```js
 const filter_string = sessionStorage.getItem("filter parameter context");
