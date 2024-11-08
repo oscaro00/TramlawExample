@@ -5,7 +5,6 @@ import sys
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='Parse command line arguments for preset filters for the fact pos table')
 
-# Required positional argument
 parser.add_argument('--preset', type=str,
                     help='A required preset argument')
 
